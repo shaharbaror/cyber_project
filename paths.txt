@@ -1,0 +1,1 @@
+.caption1 {margin-top: 60%;font-size: 25px;max-width: 300px;margin-left: 30%;} .caption2 {max-width: 300px;margin-left:5%; font-size: 30px;} #cap-div1 {width: 50%;}#cap-div2 {width: 50%;text-align: center;}
