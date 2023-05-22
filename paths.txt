@@ -1,1 +1,52 @@
-.caption1 {margin-top: 60%;font-size: 25px;max-width: 300px;margin-left: 30%;} .caption2 {max-width: 300px;margin-left:5%; font-size: 30px;} #cap-div1 {width: 50%;}#cap-div2 {width: 50%;text-align: center;}
+.caption1
+{
+    margin-top: 60%;
+    font-size: 25px;
+    max-width: 300px;
+    margin-left: 30%;
+}
+.caption2 {
+    max-width: 300px;
+    margin-left:5%;
+    font-size: 30px;
+}
+#cap-div1 {
+    width: 50%;
+}
+#cap-div2 {
+    width: 50%;
+    text-align: center;
+}
+.meme_box {
+    background-image: "url(./MemeBank/meme01)";
+    display: flex;
+}
+
+__SHEETBREAKER__
+
+.caption1 {
+  margin-top: 5%;
+  margin-left: 5%;
+  font-size: 30px;
+  max-width: 15%;
+}
+
+.caption2 {
+  margin-top: 30%;
+  margin-left: 5%;
+  font-size: 30px;
+  max-width: 15%;
+}
+
+#cap-div1 {
+    width: 50%;
+}
+#cap-div2 {
+    width: 50%;
+    text-align: center;
+}
+
+.meme_box {
+    background-image: "url(./MemeBank/meme02)";
+    display: block;
+}

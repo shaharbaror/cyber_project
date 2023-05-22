@@ -9,19 +9,34 @@ class Protocol:
     # receives the http request and returns the type of request
     @staticmethod
     def proces_request(request):
-        data = request.split(b"\r\n\r\n")
-        header = data[0].split(b"\r\n")
-        header = header[0].split(b" ")
+        data = request.split("\r\n\r\n")
+        header = data[0].split("\r\n")
+        header = header[0].split(" ")
 
         response = {
             "header_top": header,
             "type": header[0],
             "body": data[1]
         }
-        return response
+        return header, data[1]
 
     @staticmethod
-    def create_msg(body: bytes, body_type: bytes):
+    def get_file_type(filenames):
+
+        filename = filenames.split(".")[-1]
+
+        if 'jpg' in filename or 'jpeg' in filename or 'ico' in filename or 'gif' in filename or 'png' in filename:
+            filename = f"image/{filename}"
+        elif 'js' in filename:
+            filename = f"text/javascript"
+        else:
+            filename = f"text/{filename}"
+
+        return filename
+
+
+    @staticmethod
+    def create_msg(body: bytes, body_type):
 
         # gets the message body and its type, and returns the full http request template for use
         header = f"HTTP/1.0 200 OK\r\nContent-Length:{len(body)}\r\nContent-Type:{body_type}; charset=utf-8 \r\n\r\n"
