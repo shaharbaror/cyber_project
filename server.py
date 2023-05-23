@@ -8,7 +8,7 @@ from random import randint
 from Protocol import Protocol
 from mememaker import MemeMaker
 
-
+#['GET', '127.0.0.1/FirstPage?s=t&i=2&c=%20Caption%201%20hello%20my%20frient,Caption%202', 'HTTP/1.1']
 class Server:
 
     def __init__(self, address, port):
@@ -33,12 +33,56 @@ class Server:
                 file_type = Protocol.get_file_type(header[1])
                 msg = Protocol.create_msg(f, file_type)
                 return msg
+
         if "get_meme" in header[1]:
             rnd = randint(1, 2)
 
             style = MemeMaker.getStyles(rnd)
             msg = Protocol.create_msg(style, "text/css")
             return msg
+
+        if "GetTime" in header[1]:
+            with open("response.json", "wb") as r:
+                r.write(b'"time":20')
+            with open("response.json", "rb").read() as r:
+                msg = Protocol.create_msg(r, "text/json")
+                return msg
+
+        if "FirstPage" in header[1]:
+            status = header[1].split("?")[1:]
+            status = "?".join(status).split("&")
+
+            if status[0] == "s=t":
+                #need to save the player submit data
+                memeId = status[1].split("=")[-1]
+                print(memeId)
+                captions = status[2:]
+                captions = "&".join(captions)
+                # captions = captions.replace("&amp;", "&")
+                # captions = captions.replace("%20", " ")
+                return Protocol.create_msg(captions.encode(),"text/txt")
+
+            else:
+                action = status[1][2:]
+                if action == "startgame":
+                    # with open("response.json", "wb") as r:
+                    #     r.write(b'"time" : 20')
+                    rnd = randint(1,2)
+                    style = MemeMaker.getStyles(rnd)
+
+                    with open("response.json", "wb") as f:
+                        res = ("{" + f'''
+                               "memeIndex": {rnd},
+                               "captions": 2,
+                               "styles":"{f'{style}'[2:][:-1]}",
+                               "time": 120
+                               ''' + "}").encode()
+
+                        f.write(res)
+                    with open("response.json", "rb") as r:
+                        msg = Protocol.create_msg(r.read(), "text/json")
+                        return msg
+
         return b" "
 
     def accept(self):

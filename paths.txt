@@ -17,9 +17,10 @@
     width: 50%;
     text-align: center;
 }
-.meme_box {
-    background-image: "url(./MemeBank/meme01)";
+.meme_img {
+    background-image: url('./MemeBank/meme01.png');
     display: flex;
+    aspect-ratio:1/1;
 }
 
 __SHEETBREAKER__
@@ -46,7 +47,8 @@ __SHEETBREAKER__
     text-align: center;
 }
 
-.meme_box {
-    background-image: "url(./MemeBank/meme02)";
+.meme {
+    background-image: url('./MemeBank/meme02.png');
     display: block;
+    aspect-ratio: 235/ 223.5;
 }

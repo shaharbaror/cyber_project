@@ -5,6 +5,7 @@ class MemeMaker:
     def getStyles(number:int):
         with open("paths.txt", "rb") as f:
             style = f.read().split(b"__SHEETBREAKER__")[number - 1]
+            style = style.replace(b"\r\n", b"")
         return style
 
 
