@@ -1,10 +1,13 @@
 const sheet = new CSSStyleSheet();
 
-AtStart();
-
 let memeInfo = {
     cContent:[],
+    rollsLeft:5
 }
+
+AtStart();
+
+
 
 function AtStart() {
     FetchFirstData();
@@ -49,9 +52,9 @@ function AssignCaptions(captionId,inputId){
         if (event.target.innerHTML.length >= 100){
             event.target.innerHTML = caption1.innerHTML;
         }
-        else {
+        else {  
             caption1.innerHTML = event.target.innerHTML;
-            if (caption1.innerHTML.length >= 50){
+            if (caption1.innerHTML.length >= 50){ //if the text reached over 50 characters then change the text size
                 caption1.style.fontSize = `${1.25 - caption1.innerHTML.length/200}vw`;
                 event.target.style.fontSize = `${1.25 - event.target.innerHTML.length/200}vw`;
             }
@@ -59,39 +62,66 @@ function AssignCaptions(captionId,inputId){
     })
 }
 
-async function ReRollMeme(memeIndex, captions, styles) {
+async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
     //fetch the meme id and the caption amount, also make sure that if the meme is changed manualy the server wont give the mene
+    if (memeInfo.rollsLeft > 0) {
+        let response,data;
+        if (!(memeIndex && captions && styles)){
+            response = await fetch("127.0.0.1/FirstPage?s=f&a=newmeme");
+            if (response) {
+                data = await response.json();
+            }
+        } else {
+            data = {
+                memeIndex,
+                captions,
+                styles,
+            }
+        }
 
-    let data = {
-        memeIndex,
-        captions,
-        styles,
-    }
 
-    memeInfo = {...data,...memeInfo};
-    let inputDiv = document.getElementById("inputDiv");
-    let meme = document.getElementById("meme");
-    let cd = document.getElementById("c1d");
-    let inputField = document.getElementById("input1");
-   
-    sheet.replaceSync(data.styles);
-    document.adoptedStyleSheets = [sheet];
+        //because we reroll the meme we need to reset the data about the meme
+        memeInfo = {
+            ...memeInfo,
+            cContent : [],
+            rollsLeft: memeInfo.rollsLeft -1,
+            ...data,
+            
+        };
 
-    for (var i =1; i< data.captions; i++) {
-        let cdClone = cd.cloneNode(true);
-        cdClone.id = `c${i+1}d`;
-        cdClone.childNodes[1].id = `caption${i+1}`;
-        cdClone.childNodes[1].className = `meme_caption`;
-        cdClone.childNodes[1].innerHTML = `Caption ${i+1}`;
-        meme.appendChild(cdClone);
 
-        let inputClone = inputField.cloneNode(true);
-        inputClone.innerHTML = `Caption ${i+1}`;
-        inputClone.id = `input${i+1}`;
-        inputDiv.appendChild(inputClone);
+        //assign all of the inputs to the captions with event listiners
+        let inputDiv = document.getElementById("inputDiv");
+        let meme = document.getElementById("meme");
+        let cd = document.getElementById("c1d");
+        let inputField = document.getElementById("input1");
+    
+        sheet.replaceSync(data.styles);
+        document.adoptedStyleSheets = [sheet];
 
-        AssignCaptions(`caption${i+1}`,`input${i+1}`);
+        while (meme.lastChild !== meme.firstChild) {
+            console.log(meme.lastChild);
+            meme.removeChild(meme.lastChild);
+            inputDiv.removeChild(inputDiv.lastChild);
+            console.log("earased")
+        }
 
+        for (var i =1; i<= data.captions; i++) {
+            let cdClone = cd.cloneNode(true);
+            cdClone.id = `c${i}d`;
+            cdClone.childNodes[1].id = `caption${i}`;
+            cdClone.childNodes[1].className = `meme_caption`;
+            cdClone.childNodes[1].innerHTML = `Caption ${i}`;
+            meme.appendChild(cdClone);
+
+            let inputClone = inputField.cloneNode(true);
+            inputClone.innerHTML = `Caption ${i}`;
+            inputClone.id = `input${i}`;
+            inputDiv.appendChild(inputClone);
+
+            AssignCaptions(`caption${i}`,`input${i}`);
+
+        }
     }
 
 }

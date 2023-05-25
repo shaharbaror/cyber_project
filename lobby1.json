@@ -1,0 +1,13 @@
+{
+  "players": ["shahar","eyal","nerya","justavitohelilon678"],
+  "players_finished": [true, true, true, false],
+  "players_score": [3, 2,7,-1],
+  "round_number": 1,
+  "all_memes_made": [{
+    "index": 2,
+    "score": 4,
+    "text": ["hytale is on the making","for the past 8 years"],
+    "creator": 1
+  }],
+  "time_per_meme": 120
+}

@@ -17,7 +17,7 @@
     width: 50%;
     text-align: center;
 }
-.meme_img {
+.meme {
     background-image: url('./MemeBank/meme01.png');
     display: flex;
     aspect-ratio:1/1;

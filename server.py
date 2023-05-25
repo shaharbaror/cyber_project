@@ -69,18 +69,26 @@ class Server:
                     #     r.write(b'"time" : 20')
                     rnd = randint(1,2)
                     style = MemeMaker.getStyles(rnd)
+                    Protocol.update_json(rnd, 120)
 
-                    with open("response.json", "wb") as f:
-                        res = ("{" + f'''
-                               "memeIndex": {rnd},
-                               "captions": 2,
-                               "styles":"{f'{style}'[2:][:-1]}",
-                               "time": 120
-                               ''' + "}").encode()
-
-                        f.write(res)
                     with open("response.json", "rb") as r:
                         msg = Protocol.create_msg(r.read(), "text/json")
+                        return msg
+                if action == "newmeme":
+                    rnd = randint(1, 2)
+                    style = MemeMaker.getStyles(rnd)
+
+                    Protocol.update_json(rnd, 50)
+
+                    with open("response.json", "rb") as r:
+                        f = r.read()
+                        #MAKE IT WORK, IM TOO LAZY RN 
+                        f = f.split(b",")
+
+                        f = b",".join(f[:-1]) + b"\n}"
+                        print(f)
+                        msg = Protocol.create_msg(f, "text/json")
+
                         return msg
 
         return b" "

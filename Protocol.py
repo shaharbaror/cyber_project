@@ -1,5 +1,5 @@
 
-
+from mememaker import MemeMaker
 class Protocol:
 
     @staticmethod
@@ -43,3 +43,18 @@ class Protocol:
         response = header.encode()
         response += body
         return response
+
+    @staticmethod
+    def update_json(rnd: int, time: int):
+
+        styles = MemeMaker.getStyles(rnd)
+        captions = MemeMaker.get_caption_amount(rnd)
+        with open("response.json", "wb") as f:
+            res = ("{" + f'''
+                   "memeIndex": {rnd},
+                   "captions": {captions},
+                   "styles":"{f'{styles}'[2:][:-1]}",
+                   "time": {time}
+                   ''' + "}").encode()
+
+            f.write(res)

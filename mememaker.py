@@ -1,4 +1,12 @@
+
+CAPTIONS = {
+        2: 2,
+        1: 1,
+}
 class MemeMaker:
+
+
+
     def __init__(self):
         pass
     @staticmethod
@@ -14,6 +22,9 @@ class MemeMaker:
         with open(f"./MemeBank/meme{get_path(number)}", "rb") as f:
             return f.read()
 
+    @staticmethod
+    def get_caption_amount(rnd: int):
+        return CAPTIONS[rnd]
 
 def get_path(number):
     if number < 10:
