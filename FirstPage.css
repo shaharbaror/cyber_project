@@ -48,21 +48,24 @@ body{
 
 .meme_caption {
     /*need to add a cap to the input + a respnsive font size*/
-    margin: 2% 0 0 0;
+    margin: 2% 2% 2% 2%;
     font-size: 1vw;
     color: black;
     background-color: white;
-    width:fit-content;
-    font-weight: 600;
     
-    max-height: 10%;
-    max-width: 40%;
-    overflow: hidden;
+    font-weight: 600;
+    max-lines: 5;
+    
+    
+    resize:none;
+    height: 80%;
+    max-width: 500px;
 }
 
 .meme {
     
     height:80%;
+    max-width: 100%;
     background-repeat: no-repeat;
     background-size: contain;
 
@@ -115,8 +118,7 @@ body{
     width: 80%;
     height: fit-content;
     min-height: 7%;
-    max-height: 20%;
-    overflow-y: auto;
+    max-height: fit-content;
     border-radius: 45px;
     padding-top: 4%;
     padding-left: 5%;

@@ -1,9 +1,11 @@
 const sheet = new CSSStyleSheet();
-
+const username = "shahar";
 let memeInfo = {
     cContent:[],
     rollsLeft:5
 }
+
+
 
 AtStart();
 
@@ -11,7 +13,7 @@ AtStart();
 
 function AtStart() {
     FetchFirstData();
-    AssignCaptions("caption1", "input1");
+    //AssignCaptions("caption1", "input1");
 }
 
 async function FetchFirstData(){
@@ -45,25 +47,28 @@ function CountTime(timer) {
 }
 
 //Assigning an EventListener to a caption and an input so that when i change the input the caption will change too
-function AssignCaptions(captionId,inputId){
-    let caption1 = document.getElementById(captionId)
-    console.log("hi");
-    document.querySelector(`#${inputId}`).addEventListener("input", async (event) => {
-        if (event.target.innerHTML.length >= 100){
-            event.target.innerHTML = caption1.innerHTML;
-        }
-        else {  
-            caption1.innerHTML = event.target.innerHTML;
-            if (caption1.innerHTML.length >= 50){ //if the text reached over 50 characters then change the text size
-                caption1.style.fontSize = `${1.25 - caption1.innerHTML.length/200}vw`;
-                event.target.style.fontSize = `${1.25 - event.target.innerHTML.length/200}vw`;
-            }
-        }
-    })
-}
+// function AssignCaptions(captionId,inputId){
+//     let caption1 = document.getElementById(captionId)
+//     console.log("hi");
+//     document.querySelector(`#${inputId}`).addEventListener("input", async (event) => {
+//         if (event.target.value.length >= 100){
+//             event.target.value = caption1.value;
+//         }
+//         else {  
+//             console.log(event.target.value)
+//             caption1.value = event.target.value;
+//             if (caption1.value.length >= 50){ //if the text reached over 50 characters then change the text size
+//                 caption1.style.fontSize = `${1.25 - caption1.value.length/200}vw`;
+//                 event.target.style.fontSize = `${1.25 - event.target.value.length/200}vw`;
+//             }
+//         }
+       
+//     })
+// }
 
 async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
     //fetch the meme id and the caption amount, also make sure that if the meme is changed manualy the server wont give the mene
+    
     if (memeInfo.rollsLeft > 0) {
         let response,data;
         if (!(memeIndex && captions && styles)){
@@ -91,10 +96,10 @@ async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
 
 
         //assign all of the inputs to the captions with event listiners
-        let inputDiv = document.getElementById("inputDiv");
+        //let inputDiv = document.getElementById("inputDiv");
         let meme = document.getElementById("meme");
         let cd = document.getElementById("c1d");
-        let inputField = document.getElementById("input1");
+        //let inputField = document.getElementById("input1");
     
         sheet.replaceSync(data.styles);
         document.adoptedStyleSheets = [sheet];
@@ -102,7 +107,7 @@ async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
         while (meme.lastChild !== meme.firstChild) {
             console.log(meme.lastChild);
             meme.removeChild(meme.lastChild);
-            inputDiv.removeChild(inputDiv.lastChild);
+            //inputDiv.removeChild(inputDiv.lastChild);
             console.log("earased")
         }
 
@@ -111,15 +116,15 @@ async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
             cdClone.id = `c${i}d`;
             cdClone.childNodes[1].id = `caption${i}`;
             cdClone.childNodes[1].className = `meme_caption`;
-            cdClone.childNodes[1].innerHTML = `Caption ${i}`;
+            cdClone.childNodes[1].value = `Caption ${i}`;
             meme.appendChild(cdClone);
 
-            let inputClone = inputField.cloneNode(true);
-            inputClone.innerHTML = `Caption ${i}`;
-            inputClone.id = `input${i}`;
-            inputDiv.appendChild(inputClone);
+            // let inputClone = inputField.cloneNode(true);
+            // inputClone.innerHTML = `Caption ${i}`;
+            // inputClone.id = `input${i}`;
+            // inputDiv.appendChild(inputClone);
 
-            AssignCaptions(`caption${i}`,`input${i}`);
+            // AssignCaptions(`caption${i}`,`input${i}`);
 
         }
     }
@@ -127,16 +132,25 @@ async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
 }
 
 function SubmitMeme() {
+    let post = {
+        memeIndex:memeInfo.memeIndex,
+        captions:[],
+        username,
     
+    }
     //add all of the text from the captions to the meme info
     for (var i =1; i <= memeInfo.captions; i++){
-        memeInfo.cContent.push(document.getElementById(`caption${i}`).innerHTML);
+        post.captions.push(`${document.getElementById(`caption${i}`).value} \n`);
     }
+    console.log(post);
+
     try{
-        fetch(`127.0.0.1/FirstPage?s=t&i=${memeInfo.memeIndex}&c=[${memeInfo.cContent}]`,{
-            method: "GET", //get or post
-            headers: {"Content-Type": "application/json;charset=utf-8"}
-        }).then(response => console.log(response.text()))
+        console.log(`127.0.0.1/FirstPage?s=t&i=${memeInfo.memeIndex}&c=[${memeInfo.cContent}]`);
+        fetch(`127.0.0.1/FirstPage?s=t`,{
+            method: "POST", //get or post
+            headers: {"Content-Type": "application/json;charset=utf-8"},
+            body:JSON.stringify(post)
+        }).then(response => {if(response.ok){window.location.replace("WaitingPage.html")}});
         
     }catch(err){
         console.log(err);

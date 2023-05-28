@@ -49,12 +49,11 @@ class Protocol:
 
         styles = MemeMaker.getStyles(rnd)
         captions = MemeMaker.get_caption_amount(rnd)
-        with open("response.json", "wb") as f:
-            res = ("{" + f'''
-                   "memeIndex": {rnd},
-                   "captions": {captions},
-                   "styles":"{f'{styles}'[2:][:-1]}",
-                   "time": {time}
-                   ''' + "}").encode()
 
-            f.write(res)
+        res = ("{" + f'''
+               "memeIndex": {rnd},
+               "captions": {captions},
+               "styles":"{f'{styles}'[2:][:-1]}",
+               "time": {time}
+               ''' + "}").encode()
+        return res

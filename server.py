@@ -1,8 +1,10 @@
+import json
 import socket
 import os
 from socket import create_server
 from select import select
 from random import randint
+import time
 
 
 from Protocol import Protocol
@@ -53,14 +55,21 @@ class Server:
             status = "?".join(status).split("&")
 
             if status[0] == "s=t":
-                #need to save the player submit data
-                memeId = status[1].split("=")[-1]
-                print(memeId)
-                captions = status[2:]
-                captions = "&".join(captions)
-                # captions = captions.replace("&amp;", "&")
-                # captions = captions.replace("%20", " ")
-                return Protocol.create_msg(captions.encode(),"text/txt")
+                print("hi")
+
+                bodies = json.loads(body)
+                print(bodies)
+                with open("lobby1.json", "r") as f:
+                    data = json.load(f)
+                    print(data["players"])
+
+                    for i in range(len(data["players"])):
+                        print(data["players"][i])
+                        if bodies["username"] == data["players"][i]:
+                            data["players_finished"][i] = True
+                            meme_submition = {"index": bodies["memeIndex"], "text": bodies["captions"], "creator": i}
+                            print(meme_submition["text"])
+
 
             else:
                 action = status[1][2:]
@@ -68,30 +77,44 @@ class Server:
                     # with open("response.json", "wb") as r:
                     #     r.write(b'"time" : 20')
                     rnd = randint(1,2)
-                    style = MemeMaker.getStyles(rnd)
-                    Protocol.update_json(rnd, 120)
+                    with open("lobby1.json", "r") as f:
+                        data = json.load(f)
+                        data["round_timer"] = int(time.time() + 120)
+                    with open("lobby1.json","w") as f:
+                        json.dump(data, f)
+                    print(time.time())
+                    timer = 120
 
-                    with open("response.json", "rb") as r:
-                        msg = Protocol.create_msg(r.read(), "text/json")
-                        return msg
+                    msg = Protocol.update_json(rnd, timer)
+                    msg = Protocol.create_msg(msg, "text/json")
+
+                    return msg
+
                 if action == "newmeme":
                     rnd = randint(1, 2)
-                    style = MemeMaker.getStyles(rnd)
+                    with open("lobby1.json", "r") as f:
+                        data = json.load(f)
+                        json_file = Protocol.update_json(rnd, data["round_timer"] - time.time())
+                        print(json_file)
+                        return Protocol.create_msg(json_file, "text/json")
 
-                    Protocol.update_json(rnd, 50)
 
-                    with open("response.json", "rb") as r:
-                        f = r.read()
-                        #MAKE IT WORK, IM TOO LAZY RN 
-                        f = f.split(b",")
+        return Protocol.create_msg(b" ", "text/txt")
 
-                        f = b",".join(f[:-1]) + b"\n}"
-                        print(f)
-                        msg = Protocol.create_msg(f, "text/json")
-
-                        return msg
-
+    def handle_post(self, data):
+        header, body = Protocol.proces_request(data)
+        print(body)
+        header[1] = header[1][1:]
+        if "firstpage" in header[1]:
+            status = header[1].split("?")[1:]
+            status = "?".join(status).split("&")
+            if status[0] == "s=t":
+                with open("lobby1.json", "r") as f:
+                    lobby_data = json.load(f)
         return b" "
+
+
+
 
     def accept(self):
         readable, _, _ = select([self.s], [], [])
