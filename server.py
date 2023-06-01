@@ -1,5 +1,4 @@
 import json
-import socket
 import os
 from socket import create_server
 from select import select
@@ -12,6 +11,7 @@ from mememaker import MemeMaker
 
 #['GET', '127.0.0.1/FirstPage?s=t&i=2&c=%20Caption%201%20hello%20my%20frient,Caption%202', 'HTTP/1.1']
 class Server:
+
 
     def __init__(self, address, port):
         self.port = port
@@ -36,20 +36,24 @@ class Server:
                 msg = Protocol.create_msg(f, file_type)
                 return msg
 
-        if "get_meme" in header[1]:
-            rnd = randint(1, 2)
+        if "makeuser/s" in header[1]:
+            rnd = randint(1, 80000)
+            with open("lobby1.json", "r") as f:
+                data = json.load(f)
+                while str(rnd) in data["players_id"]:
+                    rnd = randint(1, 80000)
 
-            style = MemeMaker.getStyles(rnd)
-            msg = Protocol.create_msg(style, "text/css")
-            return msg
+                data["players_id"].append(str(rnd))
+                data["players"].append(body[1:-1])
+                data["players_finished"].append(False)
+                data["players_score"].append(0)
+                data["remaining_rolls"].append(0)
 
-        if "GetTime" in header[1]:
-            with open("response.json", "wb") as r:
-                r.write(b'"time":20')
-            with open("response.json", "rb").read() as r:
-                msg = Protocol.create_msg(r, "text/json")
-                return msg
+            with open("lobby1.json", "w") as f:
+                json.dump(data, f)
 
+            return Protocol.create_msg(str(rnd).encode(), "text/txt")
+            # make it so the username is added to the lobby with the correct id and send the user its id
         if "FirstPage" in header[1]:
             status = header[1].split("?")[1:]
             status = "?".join(status).split("&")
@@ -65,10 +69,15 @@ class Server:
 
                     for i in range(len(data["players"])):
                         print(data["players"][i])
-                        if bodies["username"] == data["players"][i]:
+                        if bodies["username"] == data["players"][i] and not data["players_finished"][i]:
                             data["players_finished"][i] = True
                             meme_submition = {"index": bodies["memeIndex"], "text": bodies["captions"], "creator": i}
-                            print(meme_submition["text"])
+                            data["memes_this_round"].append(meme_submition)
+                with open("lobby1.json", "w") as f:
+                    json.dump(data, f)
+
+                # needs to send all the players that another player has finished
+
 
 
             else:
@@ -76,10 +85,15 @@ class Server:
                 if action == "startgame":
                     # with open("response.json", "wb") as r:
                     #     r.write(b'"time" : 20')
-                    rnd = randint(1,2)
+                    rnd = randint(1, 2)
+                    roll_amount = 5
                     with open("lobby1.json", "r") as f:
                         data = json.load(f)
                         data["round_timer"] = int(time.time() + 120)
+                        data["round_rolls"] = roll_amount
+                        for i in range(len(data["remaining_rolls"])):
+                            data["remaining_rolls"][i] = roll_amount
+
                     with open("lobby1.json","w") as f:
                         json.dump(data, f)
                     print(time.time())
@@ -93,10 +107,34 @@ class Server:
                 if action == "newmeme":
                     rnd = randint(1, 2)
                     with open("lobby1.json", "r") as f:
+
                         data = json.load(f)
+
+                        # need to get the index of the id, to find how many rolls are left and if enough then allow if not then dont
+
+                        player_id = status[2][2:]
+                        if str(player_id) not in data["players_id"]:
+                            return Protocol.create_msg('{"isOk":false, }'.encode(),"text/json")
+                        player_index = data["players_id"].index(str(player_id))
+                    if data["remaining_rolls"][player_index] > 0:
+
+                        data["remaining_rolls"][player_index] -= 1
                         json_file = Protocol.update_json(rnd, data["round_timer"] - time.time())
                         print(json_file)
+                        with open("lobby1.json","w") as f:
+                            json.dump(data, f)
                         return Protocol.create_msg(json_file, "text/json")
+                    else:
+                        json_file = '{"isOk": false}'
+                        return Protocol.create_msg(json_file.encode(), "text/json")
+
+                if action == "getplayersdone":
+
+                    with open("lobby1.json", "r") as f:
+                        data = json.load(f)
+                    players_done = data["players_finished"].count(True)
+                    response = f'{players_done} \n {players_done}/{len(data["players"])} are done'
+                    return Protocol.create_msg(response.encode(),"text/txt")
 
 
         return Protocol.create_msg(b" ", "text/txt")

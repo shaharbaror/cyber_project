@@ -1,4 +1,6 @@
 const sheet = new CSSStyleSheet();
+const player_id = localStorage.getItem("playerID");
+localStorage.removeItem("playerID");
 const username = "shahar";
 let memeInfo = {
     cContent:[],
@@ -16,9 +18,26 @@ function AtStart() {
     //AssignCaptions("caption1", "input1");
 }
 
+async function UpdateDone() {
+    const players_done = setInterval(async () => {
+        let response = await fetch("127.0.0.1/FirstPage?s=f&a=getplayersdone");
+        if (response) {
+            let data = response.text();
+            data = (await data).split("\n");
+            console.log(data)
+            document.getElementById("players_done").innerHTML = data[1];
+            if (data[0] === data[1]) {
+                SubmitMeme();
+            }
+            
+        }
+    },1000);
+}
+
 async function FetchFirstData(){
     var data;
-    var response = await fetch("127.0.0.1/FirstPage?s=f&a=startgame");
+    
+    var response = await fetch(`127.0.0.1/FirstPage?s=f&a=startgame`);
     data = await response.json();
     console.log(data);
 
@@ -34,7 +53,7 @@ async function FetchFirstData(){
             clearInterval(inter);
         }
     }, 1000);
-
+    UpdateDone();
     ReRollMeme(data.memeIndex,data.captions,data.styles)
 
 } 
@@ -72,7 +91,7 @@ async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
     if (memeInfo.rollsLeft > 0) {
         let response,data;
         if (!(memeIndex && captions && styles)){
-            response = await fetch("127.0.0.1/FirstPage?s=f&a=newmeme");
+            response = await fetch(`127.0.0.1/FirstPage?s=f&a=newmeme&i=${player_id}`);
             if (response) {
                 data = await response.json();
             }
@@ -84,48 +103,51 @@ async function ReRollMeme(memeIndex = null, captions = null, styles = null) {
             }
         }
 
+        if (data.isOk) {
+            //because we reroll the meme we need to reset the data about the meme
+            memeInfo = {
+                ...memeInfo,
+                cContent : [],
+                rollsLeft: memeInfo.rollsLeft -1,
+                ...data,
+                
+            };
 
-        //because we reroll the meme we need to reset the data about the meme
-        memeInfo = {
-            ...memeInfo,
-            cContent : [],
-            rollsLeft: memeInfo.rollsLeft -1,
-            ...data,
-            
-        };
 
+            //assign all of the inputs to the captions with event listiners
+            //let inputDiv = document.getElementById("inputDiv");
+            let meme = document.getElementById("meme");
+            let cd = document.getElementById("c1d");
+            //let inputField = document.getElementById("input1");
+        
+            sheet.replaceSync(data.styles);
+            document.adoptedStyleSheets = [sheet];
 
-        //assign all of the inputs to the captions with event listiners
-        //let inputDiv = document.getElementById("inputDiv");
-        let meme = document.getElementById("meme");
-        let cd = document.getElementById("c1d");
-        //let inputField = document.getElementById("input1");
-    
-        sheet.replaceSync(data.styles);
-        document.adoptedStyleSheets = [sheet];
+            while (meme.lastChild !== meme.firstChild) {
+                console.log(meme.lastChild);
+                meme.removeChild(meme.lastChild);
+                //inputDiv.removeChild(inputDiv.lastChild);
+                console.log("earased")
+            }
 
-        while (meme.lastChild !== meme.firstChild) {
-            console.log(meme.lastChild);
-            meme.removeChild(meme.lastChild);
-            //inputDiv.removeChild(inputDiv.lastChild);
-            console.log("earased")
-        }
+            for (var i =1; i<= data.captions; i++) {
+                let cdClone = cd.cloneNode(true);
+                cdClone.id = `c${i}d`;
+                cdClone.childNodes[1].id = `caption${i}`;
+                cdClone.childNodes[1].className = `meme_caption`;
+                cdClone.childNodes[1].value = `Caption ${i}`;
+                meme.appendChild(cdClone);
 
-        for (var i =1; i<= data.captions; i++) {
-            let cdClone = cd.cloneNode(true);
-            cdClone.id = `c${i}d`;
-            cdClone.childNodes[1].id = `caption${i}`;
-            cdClone.childNodes[1].className = `meme_caption`;
-            cdClone.childNodes[1].value = `Caption ${i}`;
-            meme.appendChild(cdClone);
+                // let inputClone = inputField.cloneNode(true);
+                // inputClone.innerHTML = `Caption ${i}`;
+                // inputClone.id = `input${i}`;
+                // inputDiv.appendChild(inputClone);
 
-            // let inputClone = inputField.cloneNode(true);
-            // inputClone.innerHTML = `Caption ${i}`;
-            // inputClone.id = `input${i}`;
-            // inputDiv.appendChild(inputClone);
+                // AssignCaptions(`caption${i}`,`input${i}`);
 
-            // AssignCaptions(`caption${i}`,`input${i}`);
-
+            }
+        } else {
+            console.log("o hell no buddy you aint getting another one if theese jewcy memes!");
         }
     }
 

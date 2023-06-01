@@ -51,6 +51,7 @@ class Protocol:
         captions = MemeMaker.get_caption_amount(rnd)
 
         res = ("{" + f'''
+                "isOk": true,
                "memeIndex": {rnd},
                "captions": {captions},
                "styles":"{f'{styles}'[2:][:-1]}",
